@@ -6,19 +6,16 @@ import (
 )
 
 func actions(ph *Philosopher, s *Status) {
-	currentTime := time.Now().UnixNano()
-	ph.LifeLimit = currentTime + s.TimeDie
-
 	for {
 		select {
 		case <-s.Stop:
-			printMessage(s, "dead")
+			printMessage(ph, s, "dead")
 			break
 		default:
 			takeForks(ph, s)
 			eatFood(ph, s)
 			placeForks(ph, s)
-			printMessage(s, "thinking")
+			printMessage(ph, s, "thinking")
 		}
 	}
 	return
@@ -31,9 +28,11 @@ func parallelize(s *Status) error {
 	for i := 0; i < s.Quantity; i++ {
 		go func(ph *Philosopher, s *Status) {
 			defer wg.Done()
+			currentTime := time.Now().UnixNano()
+			ph.LifeLimit = currentTime + s.TimeDie
 			actions(ph, s)
 		}(&s.Philosophers[i], s)
-		time.Sleep(time.Microsecond * 42)
+		time.Sleep(time.Microsecond * 100)
 	}
 
 	wg.Wait()

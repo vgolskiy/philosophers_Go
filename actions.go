@@ -13,7 +13,7 @@ func eatFood(ph *Philosopher, s *Status) {
 	case <-s.Stop:
 		return
 	default:
-		printMessage(s, "eating")
+		printMessage(ph, s, "eating")
 	}
 	time.Sleep(time.Microsecond * time.Duration(s.TimeEat))
 	ph.EatQty++
@@ -27,14 +27,14 @@ func takeForks(ph *Philosopher, s *Status) {
 	case <-s.Stop:
 		return
 	default:
-		printMessage(s, "took left fork")
+		printMessage(ph, s, "took left fork")
 	}
 	s.MutexForks[ph.ForkRight].Lock()
 	select {
 	case <-s.Stop:
 		return
 	default:
-		printMessage(s, "took right fork")
+		printMessage(ph, s, "took right fork")
 	}
 	return
 }
@@ -44,7 +44,7 @@ func placeForks(ph *Philosopher, s *Status) {
 	case <-s.Stop:
 		return
 	default:
-		printMessage(s, "sleeping")
+		printMessage(ph, s, "sleeping")
 	}
 	s.MutexForks[ph.ForkLeft].Unlock()
 	s.MutexForks[ph.ForkRight].Unlock()
@@ -52,10 +52,10 @@ func placeForks(ph *Philosopher, s *Status) {
 	return
 }
 
-func printMessage(s *Status, str string) {
+func printMessage(ph *Philosopher, s *Status, str string) {
 	s.MutexPrint.Lock()
 	currentTime := time.Now().UnixNano()
-	fmt.Println(fmt.Sprintf("%d: %s", currentTime-s.TimeStart, str))
+	fmt.Println(fmt.Sprintf("%d: %d %s", currentTime-s.TimeStart, ph.Number+1, str))
 	s.MutexPrint.Unlock()
 	return
 }
